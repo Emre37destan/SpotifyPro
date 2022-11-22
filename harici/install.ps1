@@ -7,8 +7,8 @@ if (!($tsl_check -match '^tls12$' )) {
 }
 
 Write-Host "*****************"
-Write-Host "Gelistirici: " -NoNewline
-Write-Host "@KralDev" -ForegroundColor DarkYellow
+Write-Host "Developer: " -NoNewline
+Write-Host "KralDev" -ForegroundColor DarkYellow
 Write-Host "*****************"`n
 
 $SpotifyDirectory = "$env:APPDATA\Spotify"
@@ -30,13 +30,13 @@ $win8 = $win_os -match "\windows 8\b"
 
 if ($win11 -or $win10 -or $win8_1 -or $win8) {
     if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic) {
-        Write-Host "Spotify uygulamanın desteklenmeyen surumu algilandi."`n
-        $ch = Read-Host -Prompt "Spotify uygulamayi kaldirmak istiyor musunuz? (Y/N)"
+        Write-Host "Unsupported Microsoft Store version of Spotify detected."`n
+        $ch = Read-Host -Prompt "Do you want to uninstall Spotify Windows Store version? (Y/N)"
         if ($ch -eq 'y') {
-            Write-Host "Spotify Kaldiriliyor..."`n
+            Write-Host "Spotify Uninstalling..."`n
             Get-AppxPackage -Name SpotifyAB.SpotifyMusic | Remove-AppxPackage
         } else {
-            Write-Host 'Kapatiliyor...'`n
+            Write-Host 'Exiting...'`n
             Pause 
             exit
         }
@@ -54,7 +54,7 @@ try {
     exit
 }
 
-Write-Host "SpotifyPro'nun en son surumu indiriliyor..."`n
+Write-Host "Downloading the latest version of SpotifyPro..."`n
 
 $webClient = New-Object -TypeName System.Net.WebClient
 try {
@@ -82,9 +82,9 @@ if (-not $spotifyInstalled) {
     $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
     $version_client = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
    
-    Write-Host "Spotify indiriliyor & yukleniyor" -NoNewline
+    Write-Host "Downloading and installing Spotify" -NoNewline
     Write-Host  $version_client -ForegroundColor Green
-    Write-Host "Lutfen Bekleyin..."`n
+    Write-Host "Please wait..."`n
     
     Start-Process -FilePath $PWD\SpotifySetup.exe; wait-process -name SpotifySetup
 
@@ -106,7 +106,7 @@ if (!(test-path $SpotifyDirectory/_chrome_elf.dll)) {
     Move-Item $SpotifyDirectory\chrome_elf.dll $SpotifyDirectory\_chrome_elf.dll
 }
 
-Write-Host 'Spotify Pro Yapiliyor...'`n
+Write-Host 'Spotify Patching...'`n
 $patchFiles = "$PWD\chrome_elf.dll"
 Copy-Item -LiteralPath $patchFiles -Destination "$SpotifyDirectory"
 
@@ -117,12 +117,12 @@ Start-Sleep -Milliseconds 200
 Remove-Item -Recurse -LiteralPath $tempDirectory 
 
 do {
-    $ch = Read-Host -Prompt "Podcast'leri kapatmak istiyor musunuz? (Y/N)"
+    $ch = Read-Host -Prompt "Do you want to turn off podcasts? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) {
     
-        Write-Host "Hata, Yanlis Deger," -ForegroundColor Red -NoNewline
-        Write-Host "Tekrar Denensin Mi (Y/N)" -NoNewline
+        Write-Host "Error, wrong value," -ForegroundColor Red -NoNewline
+        Write-Host "again (Y/N)" -NoNewline
         Start-Sleep -Milliseconds 1000
         Write-Host "3" -NoNewline
         Start-Sleep -Milliseconds 1000
@@ -140,29 +140,29 @@ $xpui_spa_patch = "$env:APPDATA\Spotify\Apps\xpui.spa"
 $xpui_js_patch = "$env:APPDATA\Spotify\Apps\xpui\xpui.js"
 
 If (Test-Path $xpui_js_patch) {
-    Write-Host "Pro Yapilacak Dosyalar Bulundu"`n 
+    Write-Host "Files to be patched found"`n 
 
     $xpui_js = Get-Content $xpui_js_patch -Raw
     
-    If (!($xpui_js -match 'KralDev Tarafindan Yapildi')) {
+    If (!($xpui_js -match 'Patched by KralDev')) {
         Copy-Item $xpui_js_patch "$xpui_js_patch.bak"
         
         $new_js = $xpui_js `
             -replace 'adsEnabled:!0', 'adsEnabled:!1' `
             -replace "allSponsorships", "" `
             -replace '(return|.=.=>)"free"===(.+?)(return|.=.=>)"premium"===', '$1"premium"===$2$3"free"===' `
-            -replace '(Sol kenar cubugunda "Sizin Icin Yapildi" giris noktasini goster,default:)(!1)', '$1!0' `
-            -replace '(Yeni cipli Arama deneyimini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Sanatci sayfasinda Begenilen Sarkilar bolumunu etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(ClientX te kullanicilari engelleme ozelligini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Quicksilver uygulama ici mesajlasma modunu etkinlestir",default:)(!0)', '$1!1' `
-            -replace '(Bu etkinlestirildiginde musteriler parcalarin sarki sozleri olup olmadigini kontrol edecek",default:)(!1)', '$1!0' `
-            -replace '(Web Player ve DesktopX te yeni calma listesi olusturma akisini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Son kullanicilar icin Enhance Playlist UI ve islevselligini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Sanatci sayfalarinda yogun bir disografi rafini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Yeni tam ekran sarki sozleri sayfasini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Prod icin Oynatma Listesi Izinleri akislarini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Begenilen Sarkilari Gelistirme Kullanici arayuzune & islevselligini etkinlestir",default:)(!1)', '$1!0'
+            -replace '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0' `
+            -replace '(Enable the new Search with chips experience",default:)(!1)', '$1!0' `
+            -replace '(Enable Liked Songs section on Artist page",default:)(!1)', '$1!0' `
+            -replace '(Enable block users feature in clientX",default:)(!1)', '$1!0' `
+            -replace '(Enables quicksilver in-app messaging modal",default:)(!0)', '$1!1' `
+            -replace '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1!0' `
+            -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0' `
+            -replace '(Enable Enhance Playlist UI and functionality for end-users",default:)(!1)', '$1!0' `
+            -replace '(Enable a condensed disography shelf on artist pages",default:)(!1)', '$1!0' `
+            -replace '(Enable the new fullscreen lyrics page",default:)(!1)', '$1!0' `
+            -replace '(Enable Playlist Permissions flows for Prod",default:)(!1)', '$1!0' `
+            -replace '(Enable Enhance Liked Songs UI and functionality",default:)(!1)', '$1!0'
         if ($Podcasts_off) {
             $new_js = $new_js `
                 -replace '(return this\.queryParameters=(.),)', '$2.types=["album","playlist","artist","station"];$1' `
@@ -170,12 +170,12 @@ If (Test-Path $xpui_js_patch) {
         }
 
         Set-Content -Path $xpui_js_patch -Force -Value $new_js
-        add-content -Path $xpui_js_patch -Value '// KralDev Tarafindan Yapildi' -passthru | Out-Null
+        add-content -Path $xpui_js_patch -Value '// Patched by KralDev' -passthru | Out-Null
         $contentjs = [System.IO.File]::ReadAllText($xpui_js_patch)
         $contentjs = $contentjs.Trim()
         [System.IO.File]::WriteAllText($xpui_js_patch, $contentjs)
     } else {
-        Write-Host "Spotify Zaten Pro"`n 
+        Write-Host "Spotify is already patched"`n 
     }
 }
 
@@ -189,7 +189,7 @@ If (Test-Path $xpui_spa_patch) {
     $reader.Close()
  
 
-    If (!($patched_by_spotx -match 'KralDev Tarafindan Yapildi')) {
+    If (!($patched_by_spotx -match 'Patched by KraLDev')) {
         $zip.Dispose()
         Copy-Item $xpui_spa_patch $env:APPDATA\Spotify\Apps\xpui.bak 
 
@@ -206,18 +206,18 @@ If (Test-Path $xpui_spa_patch) {
             -replace 'adsEnabled:!0', 'adsEnabled:!1' `
             -replace "allSponsorships", "" `
             -replace '(return|.=.=>)"free"===(.+?)(return|.=.=>)"premium"===', '$1"premium"===$2$3"free"===' `
-            -replace '(Sol kenar cubugunda "Sizin Icin Yapildi" giris noktasini goster,default:)(!1)', '$1!0' `
-            -replace '(Yeni cipli Arama deneyimini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Sanatci sayfasinda Begenilen Sarkilar bolumunu etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(ClientX te kullanicilari engelleme ozelligini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Quicksilver uygulama ici mesajlasma modunu etkinlestir",default:)(!0)', '$1!1' `
-            -replace '(Bu etkinlestirildiginde musteriler parcalarin sarki sozleri olup olmadigini kontrol edecek",default:)(!1)', '$1!0' `
-            -replace '(Web Player ve DesktopX te yeni calma listesi olusturma akisini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Son kullanicilar icin Enhance Playlist UI ve islevselligini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Sanatci sayfalarinda yogun bir disografi rafini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Yeni tam ekran sarki sozleri sayfasini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Prod icin Oynatma Listesi Izinleri akislarini etkinlestir",default:)(!1)', '$1!0' `
-            -replace '(Begenilen Sarkilari Gelistirme Kullanici arayuzune & islevselligini etkinlestir",default:)(!1)', '$1!0'
+            -replace '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0' `
+            -replace '(Enable the new Search with chips experience",default:)(!1)', '$1!0' `
+            -replace '(Enable Liked Songs section on Artist page",default:)(!1)', '$1!0' `
+            -replace '(Enable block users feature in clientX",default:)(!1)', '$1!0' `
+            -replace '(Enables quicksilver in-app messaging modal",default:)(!0)', '$1!1' `
+            -replace '(With this enabled, clients will check whether tracks have lyrics available",default:)(!1)', '$1!0' `
+            -replace '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0' `
+            -replace '(Enable Enhance Playlist UI and functionality for end-users",default:)(!1)', '$1!0' `
+            -replace '(Enable a condensed disography shelf on artist pages",default:)(!1)', '$1!0' `
+            -replace '(Enable the new fullscreen lyrics page",default:)(!1)', '$1!0' `
+            -replace '(Enable Playlist Permissions flows for Prod",default:)(!1)', '$1!0' `
+            -replace '(Enable Enhance Liked Songs UI and functionality",default:)(!1)', '$1!0'
         if ($Podcasts_off) {
             $xpuiContents = $xpuiContents `
                 -replace '(return this\.queryParameters=(.),)', '$2.types=["album","playlist","artist","station"];$1' -replace ',this[.]enableShows=[a-z]', ""
@@ -226,7 +226,7 @@ If (Test-Path $xpui_spa_patch) {
         $writer = New-Object System.IO.StreamWriter($entry_xpui.Open())
         $writer.BaseStream.SetLength(0)
         $writer.Write($xpuiContents)
-        $writer.Write([System.Environment]::NewLine + '// KralDev Tarafindan Yapildi')
+        $writer.Write([System.Environment]::NewLine + '// Patched by KralDev')
         $writer.Close()
 
         $entry_vendor_xpui = $zip.GetEntry('vendor~xpui.js')
@@ -275,7 +275,7 @@ If (Test-Path $xpui_spa_patch) {
         $zip.Dispose()
     } else {
         $zip.Dispose()
-        Write-Host "Spotify Zaten Pro"`n
+        Write-Host "Spotify is already patched"`n
     }
 }
 
@@ -305,5 +305,5 @@ If (!(Test-Path $env:USERPROFILE\Desktop\Spotify.lnk)) {
     $Shortcut.Save()      
 }
 
-Write-Host "Yukleme Tamamlandi"`n -ForegroundColor Green
+Write-Host "Installation Complete"`n -ForegroundColor Green
 exit
